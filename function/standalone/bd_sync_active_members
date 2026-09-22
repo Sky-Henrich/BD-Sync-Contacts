@@ -1138,120 +1138,208 @@ try
 		}
 		else if((userActive == 2 || userActive == "2") && isFreeListingPlan == true)
 		{
-			try 
+			try
 			{
-				leadSearchCriteria = "(BD_Member_ID:equals:" + bdUserId + ")";
-				leadMatches = zoho.crm.searchRecords("Leads",leadSearchCriteria);
-				if((leadMatches == null || leadMatches.size() == 0) && bdEmail != null && bdEmail != "")
+				// FIX: a member who was already converted to Contact/Deal/Account
+				// (e.g. previously on a paid plan, now moved to a free listing
+				// plan) must keep syncing to those EXISTING records. Without this
+				// check, every contact-info edit for such a member fell straight
+				// into the Lead logic below and never touched their real Contact,
+				// Account, or Deal - so edits like a phone number change looked
+				// like they weren't syncing to CRM at all.
+				existingContactMatch = zoho.crm.searchRecords("Contacts","(BD_Member_ID:equals:" + bdUserId + ")");
+				existingContactId = "";
+				if(existingContactMatch != null && existingContactMatch.size() > 0)
 				{
-					leadMatches = zoho.crm.searchRecords("Leads","(Email:equals:" + bdEmail + ")");
+					existingContactId = existingContactMatch.get(0).get("id");
 				}
-				if((leadMatches == null || leadMatches.size() == 0) && bdPhone != null && bdPhone != "")
+				if(existingContactId != null && existingContactId != "")
 				{
-					leadMatches = zoho.crm.searchRecords("Leads","(Phone:equals:" + bdPhone + ")");
-				}
-				if((leadMatches == null || leadMatches.size() == 0) && bdCompanyName != null && bdCompanyName != "")
-				{
-					leadMatches = zoho.crm.searchRecords("Leads","(Company:equals:" + bdCompanyName + ")");
-				}
-				if(leadMatches != null && leadMatches.size() > 0)
-				{
-					leadId = leadMatches.get(0).get("id");
-					leadUpdate = Map();
-					leadUpdate.put("BD_Member_ID",bdUserId);
-					leadUpdate.put("Lead_Source","IGP");
+					existingContactUpdate = Map();
 					if(bdFirstName != null)
 					{
-						leadUpdate.put("First_Name",bdFirstName);
+						existingContactUpdate.put("First_Name",bdFirstName);
 					}
 					if(bdLastName != null && bdLastName != "")
 					{
-						leadUpdate.put("Last_Name",bdLastName);
+						existingContactUpdate.put("Last_Name",bdLastName);
 					}
 					if(bdEmail != null)
 					{
-						leadUpdate.put("Email",bdEmail);
+						existingContactUpdate.put("Email",bdEmail);
 					}
 					if(bdPhone != null)
 					{
-						leadUpdate.put("Phone",bdPhone);
-					}
-					if(bdCompanyName != null && bdCompanyName != "")
-					{
-						leadUpdate.put("Company",bdCompanyName);
+						existingContactUpdate.put("Phone",bdPhone);
 					}
 					if(mappedPlan != null && mappedPlan != "")
 					{
-						leadUpdate.put("Current_Plan",mappedPlan);
+						existingContactUpdate.put("Current_Plan",mappedPlan);
 					}
 					if(topCategoryValue != null && topCategoryValue != "")
 					{
-						leadUpdate.put("Top_Category",topCategoryValue);
-					}
-					// FIX: Website/City/Street were never mapped in this
-					// branch, which is why they didn't sync for the
-					// "ZZZ Visit Listing" test (Visit Listing is a
-					// free-listing plan, so it always lands here).
-					if(bdWebsite != null && bdWebsite != "")
-					{
-						leadUpdate.put("Website",bdWebsite);
+						existingContactUpdate.put("Top_Category",topCategoryValue);
 					}
 					if(bdCity != null && bdCity != "")
 					{
-						leadUpdate.put("City",bdCity);
+						existingContactUpdate.put("Mailing_City",bdCity);
 					}
 					if(bdStreet != null && bdStreet != "")
 					{
-						leadUpdate.put("Street",bdStreet);
+						existingContactUpdate.put("Mailing_Street",bdStreet);
 					}
-					zoho.crm.updateRecord("Leads",leadId,leadUpdate);
-					resultLog = resultLog + "Existing Lead updated for free listing BD ID " + bdUserId + "\n";
+					if(existingContactUpdate.size() > 0)
+					{
+						zoho.crm.updateRecord("Contacts",existingContactId,existingContactUpdate);
+					}
+					resultLog = resultLog + "Existing Contact updated (already converted, now on free-listing plan) for BD ID " + bdUserId + "\n";
+					existingAccountMatch = zoho.crm.searchRecords("Accounts","(BD_Member_ID:equals:" + bdUserId + ")");
+					if(existingAccountMatch != null && existingAccountMatch.size() > 0)
+					{
+						existingAccountId = existingAccountMatch.get(0).get("id");
+						existingAccountUpdate = Map();
+						if(bdPhone != null)
+						{
+							existingAccountUpdate.put("Phone",bdPhone);
+						}
+						if(bdEmail != null)
+						{
+							existingAccountUpdate.put("Email",bdEmail);
+						}
+						if(bdWebsite != null && bdWebsite != "")
+						{
+							existingAccountUpdate.put("Website",bdWebsite);
+						}
+						if(bdCity != null && bdCity != "")
+						{
+							existingAccountUpdate.put("Billing_City",bdCity);
+						}
+						if(bdStreet != null && bdStreet != "")
+						{
+							existingAccountUpdate.put("Billing_Street",bdStreet);
+						}
+						if(existingAccountUpdate.size() > 0)
+						{
+							zoho.crm.updateRecord("Accounts",existingAccountId,existingAccountUpdate);
+							resultLog = resultLog + "Existing Account updated for BD ID " + bdUserId + "\n";
+						}
+					}
 				}
 				else
 				{
-					leadCreate = Map();
-					leadCreate.put("BD_Member_ID",bdUserId);
-					leadCreate.put("Lead_Status","New Inquiry");
-					leadCreate.put("Lead_Source","IGP");
-					if(bdFirstName != null)
+					leadSearchCriteria = "(BD_Member_ID:equals:" + bdUserId + ")";
+					leadMatches = zoho.crm.searchRecords("Leads",leadSearchCriteria);
+					if((leadMatches == null || leadMatches.size() == 0) && bdEmail != null && bdEmail != "")
 					{
-						leadCreate.put("First_Name",bdFirstName);
+						leadMatches = zoho.crm.searchRecords("Leads","(Email:equals:" + bdEmail + ")");
 					}
-					leadCreate.put("Last_Name",bdLastName);
-					if(bdEmail != null)
+					if((leadMatches == null || leadMatches.size() == 0) && bdPhone != null && bdPhone != "")
 					{
-						leadCreate.put("Email",bdEmail);
+						leadMatches = zoho.crm.searchRecords("Leads","(Phone:equals:" + bdPhone + ")");
 					}
-					if(bdPhone != null)
+					if((leadMatches == null || leadMatches.size() == 0) && bdCompanyName != null && bdCompanyName != "")
 					{
-						leadCreate.put("Phone",bdPhone);
+						leadMatches = zoho.crm.searchRecords("Leads","(Company:equals:" + bdCompanyName + ")");
 					}
-					if(bdCompanyName != null && bdCompanyName != "")
+					if(leadMatches != null && leadMatches.size() > 0)
 					{
-						leadCreate.put("Company",bdCompanyName);
+						leadId = leadMatches.get(0).get("id");
+						leadUpdate = Map();
+						leadUpdate.put("BD_Member_ID",bdUserId);
+						leadUpdate.put("Lead_Source","IGP");
+						if(bdFirstName != null)
+						{
+							leadUpdate.put("First_Name",bdFirstName);
+						}
+						if(bdLastName != null && bdLastName != "")
+						{
+							leadUpdate.put("Last_Name",bdLastName);
+						}
+						if(bdEmail != null)
+						{
+							leadUpdate.put("Email",bdEmail);
+						}
+						if(bdPhone != null)
+						{
+							leadUpdate.put("Phone",bdPhone);
+						}
+						if(bdCompanyName != null && bdCompanyName != "")
+						{
+							leadUpdate.put("Company",bdCompanyName);
+						}
+						if(mappedPlan != null && mappedPlan != "")
+						{
+							leadUpdate.put("Current_Plan",mappedPlan);
+						}
+						if(topCategoryValue != null && topCategoryValue != "")
+						{
+							leadUpdate.put("Top_Category",topCategoryValue);
+						}
+						// FIX: Website/City/Street were never mapped in this
+						// branch, which is why they didn't sync for the
+						// "ZZZ Visit Listing" test (Visit Listing is a
+						// free-listing plan, so it always lands here).
+						if(bdWebsite != null && bdWebsite != "")
+						{
+							leadUpdate.put("Website",bdWebsite);
+						}
+						if(bdCity != null && bdCity != "")
+						{
+							leadUpdate.put("City",bdCity);
+						}
+						if(bdStreet != null && bdStreet != "")
+						{
+							leadUpdate.put("Street",bdStreet);
+						}
+						zoho.crm.updateRecord("Leads",leadId,leadUpdate);
+						resultLog = resultLog + "Existing Lead updated for free listing BD ID " + bdUserId + "\n";
 					}
-					if(mappedPlan != null && mappedPlan != "")
+					else
 					{
-						leadCreate.put("Current_Plan",mappedPlan);
+						leadCreate = Map();
+						leadCreate.put("BD_Member_ID",bdUserId);
+						leadCreate.put("Lead_Status","New Inquiry");
+						leadCreate.put("Lead_Source","IGP");
+						if(bdFirstName != null)
+						{
+							leadCreate.put("First_Name",bdFirstName);
+						}
+						leadCreate.put("Last_Name",bdLastName);
+						if(bdEmail != null)
+						{
+							leadCreate.put("Email",bdEmail);
+						}
+						if(bdPhone != null)
+						{
+							leadCreate.put("Phone",bdPhone);
+						}
+						if(bdCompanyName != null && bdCompanyName != "")
+						{
+							leadCreate.put("Company",bdCompanyName);
+						}
+						if(mappedPlan != null && mappedPlan != "")
+						{
+							leadCreate.put("Current_Plan",mappedPlan);
+						}
+						if(topCategoryValue != null && topCategoryValue != "")
+						{
+							leadCreate.put("Top_Category",topCategoryValue);
+						}
+						if(bdWebsite != null && bdWebsite != "")
+						{
+							leadCreate.put("Website",bdWebsite);
+						}
+						if(bdCity != null && bdCity != "")
+						{
+							leadCreate.put("City",bdCity);
+						}
+						if(bdStreet != null && bdStreet != "")
+						{
+							leadCreate.put("Street",bdStreet);
+						}
+						newLeadResp = zoho.crm.createRecord("Leads",leadCreate);
+						resultLog = resultLog + "New Lead created as New Inquiry for free listing BD ID " + bdUserId + "\n";
 					}
-					if(topCategoryValue != null && topCategoryValue != "")
-					{
-						leadCreate.put("Top_Category",topCategoryValue);
-					}
-					if(bdWebsite != null && bdWebsite != "")
-					{
-						leadCreate.put("Website",bdWebsite);
-					}
-					if(bdCity != null && bdCity != "")
-					{
-						leadCreate.put("City",bdCity);
-					}
-					if(bdStreet != null && bdStreet != "")
-					{
-						leadCreate.put("Street",bdStreet);
-					}
-					newLeadResp = zoho.crm.createRecord("Leads",leadCreate);
-					resultLog = resultLog + "New Lead created as New Inquiry for free listing BD ID " + bdUserId + "\n";
 				}
 			}
 			catch (leadError)
