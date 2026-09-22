@@ -531,7 +531,22 @@ try
 				}
 				else
 				{
-					if(bdEmail != null && bdEmail != "")
+					// FIX: search by BD_Member_ID first, same as every other lookup
+					// in this script. Without this, editing a member's Email (the
+					// prior search key) orphans the existing Contact: the search below
+					// runs against the NEW email fetched from BD, which the Contact
+					// record doesn't have yet, so no match is found and the edit
+					// silently creates a duplicate Contact instead of updating the
+					// real one.
+					if(bdUserId != null && bdUserId != "")
+					{
+						contactSearch = zoho.crm.searchRecords("Contacts","(BD_Member_ID:equals:" + bdUserId + ")");
+						if(contactSearch != null && contactSearch.size() > 0)
+						{
+							contactId = contactSearch.get(0).get("id");
+						}
+					}
+					if((contactId == null || contactId == "") && bdEmail != null && bdEmail != "")
 					{
 						contactSearch = zoho.crm.searchRecords("Contacts","(Email:equals:" + bdEmail + ")");
 						if(contactSearch != null && contactSearch.size() > 0)
@@ -950,52 +965,74 @@ try
 					else
 					{
 						newContactId = "";
-						if(bdEmail != null && bdEmail != "")
+						// FIX: try BD_Member_ID before Email, same as every other
+						// lookup in this script. Matching by Email alone means an
+						// edit that changes the member's email can no longer find
+						// their existing Contact (the record still has the OLD
+						// email until this update runs), so the edit silently
+						// spawns a duplicate Contact instead of updating the real
+						// one.
+						if(bdUserId != null && bdUserId != "")
+						{
+							contactSearchById = zoho.crm.searchRecords("Contacts","(BD_Member_ID:equals:" + bdUserId + ")");
+							if(contactSearchById != null && contactSearchById.size() > 0)
+							{
+								newContactId = contactSearchById.get(0).get("id");
+							}
+						}
+						if((newContactId == null || newContactId == "") && bdEmail != null && bdEmail != "")
 						{
 							contactSearchByEmail = zoho.crm.searchRecords("Contacts","(Email:equals:" + bdEmail + ")");
 							if(contactSearchByEmail != null && contactSearchByEmail.size() > 0)
 							{
 								newContactId = contactSearchByEmail.get(0).get("id");
-								contactRefresh = Map();
-								contactRefresh.put("BD_Member_ID",bdUserId);
-								if(bdFirstName != null)
-								{
-									contactRefresh.put("First_Name",bdFirstName);
-								}
-								if(bdLastName != null && bdLastName != "")
-								{
-									contactRefresh.put("Last_Name",bdLastName);
-								}
-								if(bdPhone != null)
-								{
-									contactRefresh.put("Phone",bdPhone);
-								}
-								if(mappedPlan != null && mappedPlan != "")
-								{
-									contactRefresh.put("Current_Plan",mappedPlan);
-								}
-								if(topCategoryValue != null && topCategoryValue != "")
-								{
-									contactRefresh.put("Top_Category",topCategoryValue);
-								}
-								if(accountId != "")
-								{
-									contactRefresh.put("Account_Name",accountId);
-								}
-								if(bdCity != null && bdCity != "")
-								{
-									contactRefresh.put("Mailing_City",bdCity);
-								}
-								if(bdStreet != null && bdStreet != "")
-								{
-									contactRefresh.put("Mailing_Street",bdStreet);
-								}
-								if(contactRefresh.size() > 0)
-								{
-									zoho.crm.updateRecord("Contacts",newContactId,contactRefresh);
-								}
-								resultLog = resultLog + "Existing Contact reused for BD ID " + bdUserId + "\n";
 							}
+						}
+						if(newContactId != null && newContactId != "")
+						{
+							contactRefresh = Map();
+							contactRefresh.put("BD_Member_ID",bdUserId);
+							if(bdFirstName != null)
+							{
+								contactRefresh.put("First_Name",bdFirstName);
+							}
+							if(bdLastName != null && bdLastName != "")
+							{
+								contactRefresh.put("Last_Name",bdLastName);
+							}
+							if(bdEmail != null)
+							{
+								contactRefresh.put("Email",bdEmail);
+							}
+							if(bdPhone != null)
+							{
+								contactRefresh.put("Phone",bdPhone);
+							}
+							if(mappedPlan != null && mappedPlan != "")
+							{
+								contactRefresh.put("Current_Plan",mappedPlan);
+							}
+							if(topCategoryValue != null && topCategoryValue != "")
+							{
+								contactRefresh.put("Top_Category",topCategoryValue);
+							}
+							if(accountId != "")
+							{
+								contactRefresh.put("Account_Name",accountId);
+							}
+							if(bdCity != null && bdCity != "")
+							{
+								contactRefresh.put("Mailing_City",bdCity);
+							}
+							if(bdStreet != null && bdStreet != "")
+							{
+								contactRefresh.put("Mailing_Street",bdStreet);
+							}
+							if(contactRefresh.size() > 0)
+							{
+								zoho.crm.updateRecord("Contacts",newContactId,contactRefresh);
+							}
+							resultLog = resultLog + "Existing Contact reused for BD ID " + bdUserId + "\n";
 						}
 						if(newContactId == null || newContactId == "")
 						{
