@@ -730,7 +730,6 @@ try
 				if(dealMatches != null && dealMatches.size() > 0)
 				{
 					dealId = dealMatches.get(0).get("id");
-					currentStage = dealMatches.get(0).get("Stage");
 					dealFull = zoho.crm.getRecordById("Deals",dealId);
 					dealContactId = null;
 					if(dealFull != null)
@@ -745,10 +744,6 @@ try
 						}
 					}
 					updateMap = Map();
-					if(currentStage != "Closed Won")
-					{
-						updateMap.put("Stage","Closed Won");
-					}
 					if(accountId != "")
 					{
 						updateMap.put("Account_Name",accountId);
