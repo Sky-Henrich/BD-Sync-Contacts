@@ -487,6 +487,15 @@ try
 						{
 							accountId = acctSearch.get(0).get("id");
 							acctUpdate = Map();
+							// FIX: Account_Name was only ever set on acctCreate, never on
+							// this update path. A Community member whose Account already
+							// existed (e.g. from an earlier sync) never got renamed when
+							// their company name changed - they just kept whatever name
+							// the Account was first created with.
+							if(acctNameToUse != null && acctNameToUse != "")
+							{
+								acctUpdate.put("Account_Name",acctNameToUse);
+							}
 							acctUpdate.put("Phone",bdPhone);
 							acctUpdate.put("Email",bdEmail);
 							acctUpdate.put("Current_Plan",mappedPlan);
