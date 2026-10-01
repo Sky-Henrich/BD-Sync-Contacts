@@ -747,17 +747,32 @@ try
 					}
 					acctNameToUse = acctNameToUse.trim();
 				}
-				try 
+				try
 				{
-					acctSearch = zoho.crm.searchRecords("Accounts","(Account_Name:equals:" + acctNameToUse + ")");
+					// FIX: this used to search by Account_Name only. Since
+					// acctNameToUse is always the CURRENT company name fetched live
+					// from BD, a company-name change meant this search looked for a
+					// name that didn't exist yet on any Account - the existing
+					// Account still had the OLD name - so it never matched, fell
+					// into the "no match" branch below, and created a brand-new
+					// duplicate Account instead of renaming the real one (this is
+					// why BD ID 12203 ended up with 4 separate Accounts in CRM: "Z
+					// Live Verificado", "ZZ", "ZZ Live Verificado", "ZZZ Live
+					// Verificado"). BD_Member_ID is stable across a name change, so
+					// it's tried first; Account_Name is kept only as a fallback for
+					// an Account that predates BD_Member_ID being populated on it.
+					acctSearch = zoho.crm.searchRecords("Accounts","(BD_Member_ID:equals:" + bdUserId + ")");
+					if((acctSearch == null || acctSearch.size() == 0) && acctNameToUse != null && acctNameToUse != "")
+					{
+						acctSearch = zoho.crm.searchRecords("Accounts","(Account_Name:equals:" + acctNameToUse + ")");
+					}
 					if(acctSearch != null && acctSearch.size() > 0)
 					{
 						accountId = acctSearch.get(0).get("id");
 						acctUpdate = Map();
-						// FIX: same gap as the Community branch - Account_Name was only
-						// ever set on acctCreate, never here, so an existing paid
-						// member's Account never got renamed when their company name
-						// changed in BD.
+						// Account_Name is now always included here (not just on
+						// create), so finding the existing record by BD_Member_ID
+						// above actually renames it when the company name changed.
 						if(acctNameToUse != null && acctNameToUse != "")
 						{
 							acctUpdate.put("Account_Name",acctNameToUse);
