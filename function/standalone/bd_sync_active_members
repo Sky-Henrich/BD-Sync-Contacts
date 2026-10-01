@@ -446,6 +446,10 @@ try
 							{
 								acctUpdate.put("Billing_Street",bdStreet);
 							}
+							if(bdBusinessSummary != null && bdBusinessSummary != "")
+							{
+								acctUpdate.put("About",bdBusinessSummary);
+							}
 							zoho.crm.updateRecord("Accounts",accountId,acctUpdate);
 							resultLog = resultLog + "Existing Account matched/updated for Community BD ID " + bdUserId + " (" + acctNameToUse + ")\n";
 						}
@@ -469,6 +473,10 @@ try
 							if(bdStreet != null && bdStreet != "")
 							{
 								acctCreate.put("Billing_Street",bdStreet);
+							}
+							if(bdBusinessSummary != null && bdBusinessSummary != "")
+							{
+								acctCreate.put("About",bdBusinessSummary);
 							}
 							acctResp = zoho.crm.createRecord("Accounts",acctCreate);
 							accountId = acctResp.get("id");
@@ -676,6 +684,10 @@ try
 						{
 							acctUpdate.put("Billing_Street",bdStreet);
 						}
+						if(bdBusinessSummary != null && bdBusinessSummary != "")
+						{
+							acctUpdate.put("About",bdBusinessSummary);
+						}
 						zoho.crm.updateRecord("Accounts",accountId,acctUpdate);
 						resultLog = resultLog + "Existing Account matched/updated for BD ID " + bdUserId + " (" + acctNameToUse + ")\n";
 					}
@@ -699,6 +711,10 @@ try
 						if(bdStreet != null && bdStreet != "")
 						{
 							acctCreate.put("Billing_Street",bdStreet);
+						}
+						if(bdBusinessSummary != null && bdBusinessSummary != "")
+						{
+							acctCreate.put("About",bdBusinessSummary);
 						}
 						acctResp = zoho.crm.createRecord("Accounts",acctCreate);
 						accountId = acctResp.get("id");
@@ -760,6 +776,10 @@ try
 					if(paymentOptionValue != null && paymentOptionValue != "")
 					{
 						updateMap.put("Payment_Option",paymentOptionValue);
+					}
+					if(bdBusinessSummary != null && bdBusinessSummary != "")
+					{
+						updateMap.put("About",bdBusinessSummary);
 					}
 					if(updateMap.size() > 0)
 					{
@@ -870,6 +890,10 @@ try
 						{
 							dealDetails.put("Payment_Option",paymentOptionValue);
 						}
+						if(bdBusinessSummary != null && bdBusinessSummary != "")
+						{
+							dealDetails.put("About",bdBusinessSummary);
+						}
 						existingContactId = "";
 						if(bdEmail != null && bdEmail != "")
 						{
@@ -914,6 +938,10 @@ try
 								if(paymentOptionValue != null && paymentOptionValue != "")
 								{
 									dealFixMap.put("Payment_Option",paymentOptionValue);
+								}
+								if(bdBusinessSummary != null && bdBusinessSummary != "")
+								{
+									dealFixMap.put("About",bdBusinessSummary);
 								}
 								zoho.crm.updateRecord("Deals",newDealIdFromConversion,dealFixMap);
 								resultLog = resultLog + "Deal Current_Plan/Top_Category/BD_Member_ID/Subscription_Start_Date/Payment_Option force-synced after conversion for BD ID " + bdUserId + "\n";
@@ -1111,6 +1139,10 @@ try
 						{
 							dealMap.put("Payment_Option",paymentOptionValue);
 						}
+						if(bdBusinessSummary != null && bdBusinessSummary != "")
+						{
+							dealMap.put("About",bdBusinessSummary);
+						}
 						newDealResp = zoho.crm.createRecord("Deals",dealMap);
 						resultLog = resultLog + "New Deal created directly for unsynced BD ID " + bdUserId + "\n";
 					}
@@ -1233,6 +1265,10 @@ try
 						if(bdStreet != null && bdStreet != "")
 						{
 							existingAccountUpdate.put("Billing_Street",bdStreet);
+						}
+						if(bdBusinessSummary != null && bdBusinessSummary != "")
+						{
+							existingAccountUpdate.put("About",bdBusinessSummary);
 						}
 						if(existingAccountUpdate.size() > 0)
 						{
