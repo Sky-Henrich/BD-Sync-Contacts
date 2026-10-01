@@ -10,6 +10,7 @@ bdWebsiteRaw = "";
 bdCityRaw = "";
 bdAddress1Raw = "";
 bdAddress2Raw = "";
+bdBusinessSummaryRaw = "";
 // ==================== VERIFIED_MEMBER_SYNC PATCH (added) ====================
 // Ported over from bd_sync_active_members so mappedVerifiedMember (used by the
 // VERIFIED_LEAD_INSTANT_CONVERT block below) actually exists in this script.
@@ -57,6 +58,12 @@ if(body != null && body != "")
 			else if(fieldKey == "address2")
 			{
 				bdAddress2Raw = fieldValue;
+			}
+			// BD's "Business Summary" field on the Contact Details form posts
+			// under the raw key "search_description" -> Leads.About.
+			else if(fieldKey == "search_description")
+			{
+				bdBusinessSummaryRaw = fieldValue;
 			}
 			// ==================== VERIFIED_MEMBER_SYNC PATCH (added) ====================
 			else if(fieldKey == "user[verified]")
@@ -183,6 +190,11 @@ if(bdAddress2Raw != null && bdAddress2Raw != "")
 		bdStreet = addr2Decoded;
 	}
 }
+bdBusinessSummary = "";
+if(bdBusinessSummaryRaw != null && bdBusinessSummaryRaw != "")
+{
+	bdBusinessSummary = zoho.encryption.urlDecode(bdBusinessSummaryRaw.replaceAll("\\+"," "));
+}
 planMap = Map();
 planMap.put("listing","Listing");
 planMap.put("visit listing","Visit Listing");
@@ -289,6 +301,10 @@ try
 		if(bdStreet == "" && u.get("address1") != null)
 		{
 			bdStreet = u.get("address1");
+		}
+		if(bdBusinessSummary == "" && u.get("search_description") != null)
+		{
+			bdBusinessSummary = u.get("search_description");
 		}
 		subSchema = u.get("subscription_schema");
 		rawPlan = "";
@@ -1291,6 +1307,10 @@ try
 						{
 							leadUpdate.put("Street",bdStreet);
 						}
+						if(bdBusinessSummary != null && bdBusinessSummary != "")
+						{
+							leadUpdate.put("About",bdBusinessSummary);
+						}
 						zoho.crm.updateRecord("Leads",leadId,leadUpdate);
 						resultLog = resultLog + "Existing Lead updated for free listing BD ID " + bdUserId + "\n";
 					}
@@ -1336,6 +1356,10 @@ try
 						if(bdStreet != null && bdStreet != "")
 						{
 							leadCreate.put("Street",bdStreet);
+						}
+						if(bdBusinessSummary != null && bdBusinessSummary != "")
+						{
+							leadCreate.put("About",bdBusinessSummary);
 						}
 						newLeadResp = zoho.crm.createRecord("Leads",leadCreate);
 						resultLog = resultLog + "New Lead created as New Inquiry for free listing BD ID " + bdUserId + "\n";
