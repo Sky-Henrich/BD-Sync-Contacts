@@ -231,22 +231,22 @@ if(bdBusinessSummaryRaw != null && bdBusinessSummaryRaw != "")
 bdStayStatus = "";
 if(bdStayStatusRaw != null && bdStayStatusRaw != "")
 {
-	bdStayStatus = zoho.encryption.urlDecode(bdStayStatusRaw.replaceAll("\\+"," "));
+	bdStayStatus = zoho.encryption.urlDecode(bdStayStatusRaw.replaceAll("\\+"," ")).replaceAll("_"," ");
 }
 bdInterests = "";
 if(bdInterestsRaw != null && bdInterestsRaw != "")
 {
-	bdInterests = zoho.encryption.urlDecode(bdInterestsRaw.replaceAll("\\+"," "));
+	bdInterests = zoho.encryption.urlDecode(bdInterestsRaw.replaceAll("\\+"," ")).replaceAll("_"," ");
 }
 bdWorkingStatus = "";
 if(bdWorkingStatusRaw != null && bdWorkingStatusRaw != "")
 {
-	bdWorkingStatus = zoho.encryption.urlDecode(bdWorkingStatusRaw.replaceAll("\\+"," "));
+	bdWorkingStatus = zoho.encryption.urlDecode(bdWorkingStatusRaw.replaceAll("\\+"," ")).replaceAll("_"," ");
 }
 bdInvestmentInterests = "";
 if(bdInvestmentInterestsRaw != null && bdInvestmentInterestsRaw != "")
 {
-	bdInvestmentInterests = zoho.encryption.urlDecode(bdInvestmentInterestsRaw.replaceAll("\\+"," "));
+	bdInvestmentInterests = zoho.encryption.urlDecode(bdInvestmentInterestsRaw.replaceAll("\\+"," ")).replaceAll("_"," ");
 }
 bdAdditionalDetails = "";
 if(bdAdditionalDetailsRaw != null && bdAdditionalDetailsRaw != "")
