@@ -754,6 +754,14 @@ try
 					{
 						accountId = acctSearch.get(0).get("id");
 						acctUpdate = Map();
+						// FIX: same gap as the Community branch - Account_Name was only
+						// ever set on acctCreate, never here, so an existing paid
+						// member's Account never got renamed when their company name
+						// changed in BD.
+						if(acctNameToUse != null && acctNameToUse != "")
+						{
+							acctUpdate.put("Account_Name",acctNameToUse);
+						}
 						acctUpdate.put("Phone",bdPhone);
 						acctUpdate.put("Email",bdEmail);
 						acctUpdate.put("Current_Plan",mappedPlan);
