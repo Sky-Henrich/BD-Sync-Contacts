@@ -11,6 +11,11 @@ bdCityRaw = "";
 bdAddress1Raw = "";
 bdAddress2Raw = "";
 bdBusinessSummaryRaw = "";
+bdStayStatusRaw = "";
+bdInterestsRaw = "";
+bdWorkingStatusRaw = "";
+bdInvestmentInterestsRaw = "";
+bdAdditionalDetailsRaw = "";
 // ==================== VERIFIED_MEMBER_SYNC PATCH (added) ====================
 // Ported over from bd_sync_active_members so mappedVerifiedMember (used by the
 // VERIFIED_LEAD_INSTANT_CONVERT block below) actually exists in this script.
@@ -64,6 +69,34 @@ if(body != null && body != "")
 			else if(fieldKey == "search_description")
 			{
 				bdBusinessSummaryRaw = fieldValue;
+			}
+			// Checkbox-group fields post as both "fieldname[0]=code" (indexed,
+			// one per checked box) and "fieldname_stringify=code1,code2,..."
+			// (every checked code comma-joined). We use the *_stringify form
+			// since it already aggregates multi-select into one value. We
+			// deliberately do NOT use *_values_stringify (the human-readable
+			// label) - several labels contain a literal "&" (e.g. "Adventure
+			// & Outdoor Activities"), which would get sliced apart by the "&"
+			// split above and corrupt the rest of the payload parse.
+			else if(fieldKey == "stay_status_stringify")
+			{
+				bdStayStatusRaw = fieldValue;
+			}
+			else if(fieldKey == "panama_interests_stringify")
+			{
+				bdInterestsRaw = fieldValue;
+			}
+			else if(fieldKey == "working_status_stringify")
+			{
+				bdWorkingStatusRaw = fieldValue;
+			}
+			else if(fieldKey == "investment_interests_stringify")
+			{
+				bdInvestmentInterestsRaw = fieldValue;
+			}
+			else if(fieldKey == "comments_questions")
+			{
+				bdAdditionalDetailsRaw = fieldValue;
 			}
 			// ==================== VERIFIED_MEMBER_SYNC PATCH (added) ====================
 			else if(fieldKey == "user[verified]")
@@ -194,6 +227,31 @@ bdBusinessSummary = "";
 if(bdBusinessSummaryRaw != null && bdBusinessSummaryRaw != "")
 {
 	bdBusinessSummary = zoho.encryption.urlDecode(bdBusinessSummaryRaw.replaceAll("\\+"," "));
+}
+bdStayStatus = "";
+if(bdStayStatusRaw != null && bdStayStatusRaw != "")
+{
+	bdStayStatus = zoho.encryption.urlDecode(bdStayStatusRaw.replaceAll("\\+"," "));
+}
+bdInterests = "";
+if(bdInterestsRaw != null && bdInterestsRaw != "")
+{
+	bdInterests = zoho.encryption.urlDecode(bdInterestsRaw.replaceAll("\\+"," "));
+}
+bdWorkingStatus = "";
+if(bdWorkingStatusRaw != null && bdWorkingStatusRaw != "")
+{
+	bdWorkingStatus = zoho.encryption.urlDecode(bdWorkingStatusRaw.replaceAll("\\+"," "));
+}
+bdInvestmentInterests = "";
+if(bdInvestmentInterestsRaw != null && bdInvestmentInterestsRaw != "")
+{
+	bdInvestmentInterests = zoho.encryption.urlDecode(bdInvestmentInterestsRaw.replaceAll("\\+"," "));
+}
+bdAdditionalDetails = "";
+if(bdAdditionalDetailsRaw != null && bdAdditionalDetailsRaw != "")
+{
+	bdAdditionalDetails = zoho.encryption.urlDecode(bdAdditionalDetailsRaw.replaceAll("\\+"," "));
 }
 planMap = Map();
 planMap.put("listing","Listing");
@@ -625,6 +683,26 @@ try
 				{
 					contactMap.put("Mailing_Street",bdStreet);
 				}
+				if(bdStayStatus != null && bdStayStatus != "")
+				{
+					contactMap.put("Stay_Status",bdStayStatus);
+				}
+				if(bdInterests != null && bdInterests != "")
+				{
+					contactMap.put("Interests",bdInterests);
+				}
+				if(bdWorkingStatus != null && bdWorkingStatus != "")
+				{
+					contactMap.put("Working_Status",bdWorkingStatus);
+				}
+				if(bdInvestmentInterests != null && bdInvestmentInterests != "")
+				{
+					contactMap.put("Investment_Interests",bdInvestmentInterests);
+				}
+				if(bdAdditionalDetails != null && bdAdditionalDetails != "")
+				{
+					contactMap.put("Additional_Details",bdAdditionalDetails);
+				}
 				if(contactId != null && contactId != "")
 				{
 					zoho.crm.updateRecord("Contacts",contactId,contactMap);
@@ -821,6 +899,26 @@ try
 						{
 							contactUpdate.put("Mailing_Street",bdStreet);
 						}
+						if(bdStayStatus != null && bdStayStatus != "")
+						{
+							contactUpdate.put("Stay_Status",bdStayStatus);
+						}
+						if(bdInterests != null && bdInterests != "")
+						{
+							contactUpdate.put("Interests",bdInterests);
+						}
+						if(bdWorkingStatus != null && bdWorkingStatus != "")
+						{
+							contactUpdate.put("Working_Status",bdWorkingStatus);
+						}
+						if(bdInvestmentInterests != null && bdInvestmentInterests != "")
+						{
+							contactUpdate.put("Investment_Interests",bdInvestmentInterests);
+						}
+						if(bdAdditionalDetails != null && bdAdditionalDetails != "")
+						{
+							contactUpdate.put("Additional_Details",bdAdditionalDetails);
+						}
 						if(contactUpdate.size() > 0)
 						{
 							zoho.crm.updateRecord("Contacts",dealContactId,contactUpdate);
@@ -992,6 +1090,26 @@ try
 								{
 									postConvertContactUpdate.put("Mailing_Street",bdStreet);
 								}
+								if(bdStayStatus != null && bdStayStatus != "")
+								{
+									postConvertContactUpdate.put("Stay_Status",bdStayStatus);
+								}
+								if(bdInterests != null && bdInterests != "")
+								{
+									postConvertContactUpdate.put("Interests",bdInterests);
+								}
+								if(bdWorkingStatus != null && bdWorkingStatus != "")
+								{
+									postConvertContactUpdate.put("Working_Status",bdWorkingStatus);
+								}
+								if(bdInvestmentInterests != null && bdInvestmentInterests != "")
+								{
+									postConvertContactUpdate.put("Investment_Interests",bdInvestmentInterests);
+								}
+								if(bdAdditionalDetails != null && bdAdditionalDetails != "")
+								{
+									postConvertContactUpdate.put("Additional_Details",bdAdditionalDetails);
+								}
 								zoho.crm.updateRecord("Contacts",resultContactId,postConvertContactUpdate);
 								resultLog = resultLog + "Contact BD_Member_ID/Current_Plan/Account linked after conversion for BD ID " + bdUserId + "\n";
 							}
@@ -1067,6 +1185,26 @@ try
 							{
 								contactRefresh.put("Mailing_Street",bdStreet);
 							}
+							if(bdStayStatus != null && bdStayStatus != "")
+							{
+								contactRefresh.put("Stay_Status",bdStayStatus);
+							}
+							if(bdInterests != null && bdInterests != "")
+							{
+								contactRefresh.put("Interests",bdInterests);
+							}
+							if(bdWorkingStatus != null && bdWorkingStatus != "")
+							{
+								contactRefresh.put("Working_Status",bdWorkingStatus);
+							}
+							if(bdInvestmentInterests != null && bdInvestmentInterests != "")
+							{
+								contactRefresh.put("Investment_Interests",bdInvestmentInterests);
+							}
+							if(bdAdditionalDetails != null && bdAdditionalDetails != "")
+							{
+								contactRefresh.put("Additional_Details",bdAdditionalDetails);
+							}
 							if(contactRefresh.size() > 0)
 							{
 								zoho.crm.updateRecord("Contacts",newContactId,contactRefresh);
@@ -1100,6 +1238,26 @@ try
 							if(bdStreet != null && bdStreet != "")
 							{
 								contactMap.put("Mailing_Street",bdStreet);
+							}
+							if(bdStayStatus != null && bdStayStatus != "")
+							{
+								contactMap.put("Stay_Status",bdStayStatus);
+							}
+							if(bdInterests != null && bdInterests != "")
+							{
+								contactMap.put("Interests",bdInterests);
+							}
+							if(bdWorkingStatus != null && bdWorkingStatus != "")
+							{
+								contactMap.put("Working_Status",bdWorkingStatus);
+							}
+							if(bdInvestmentInterests != null && bdInvestmentInterests != "")
+							{
+								contactMap.put("Investment_Interests",bdInvestmentInterests);
+							}
+							if(bdAdditionalDetails != null && bdAdditionalDetails != "")
+							{
+								contactMap.put("Additional_Details",bdAdditionalDetails);
 							}
 							contactResp = zoho.crm.createRecord("Contacts",contactMap);
 							newContactId = contactResp.get("id");
@@ -1230,6 +1388,26 @@ try
 					if(bdStreet != null && bdStreet != "")
 					{
 						existingContactUpdate.put("Mailing_Street",bdStreet);
+					}
+					if(bdStayStatus != null && bdStayStatus != "")
+					{
+						existingContactUpdate.put("Stay_Status",bdStayStatus);
+					}
+					if(bdInterests != null && bdInterests != "")
+					{
+						existingContactUpdate.put("Interests",bdInterests);
+					}
+					if(bdWorkingStatus != null && bdWorkingStatus != "")
+					{
+						existingContactUpdate.put("Working_Status",bdWorkingStatus);
+					}
+					if(bdInvestmentInterests != null && bdInvestmentInterests != "")
+					{
+						existingContactUpdate.put("Investment_Interests",bdInvestmentInterests);
+					}
+					if(bdAdditionalDetails != null && bdAdditionalDetails != "")
+					{
+						existingContactUpdate.put("Additional_Details",bdAdditionalDetails);
 					}
 					if(existingContactUpdate.size() > 0)
 					{
